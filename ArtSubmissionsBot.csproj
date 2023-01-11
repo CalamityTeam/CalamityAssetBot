@@ -7,4 +7,22 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Content Include="bin\Debug\net7.0\BotFiles\VoteCache.json" />
+    <Content Include="bin\Debug\net7.0\BotFiles\Weapons.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net7.0\BotFiles\Token.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-00009" />
+    <PackageReference Include="DSharpPlus.SlashCommands" Version="5.0.0-nightly-00009" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="bin\Debug\net7.0\BotFiles\ReuploadFiles\" />
+  </ItemGroup>
+
 </Project>
