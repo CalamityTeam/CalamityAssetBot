@@ -6,6 +6,8 @@ namespace ArtSubmissionsBot
     {
         internal static Random Random = new();
         internal static Dictionary<ulong, Dictionary<ulong, bool>> VoteCache = new();
+        internal static readonly ulong DevRoleID = 440605627526545429uL;
+        internal static readonly ulong DevServerID = 458428222061936650uL;
 
         internal static class Buttons
         {
@@ -60,6 +62,7 @@ namespace ArtSubmissionsBot
                 internal static readonly ulong AssetVoting = 612004648118779904uL;
                 internal static readonly ulong CompletedAssets = 458446442340548639uL;
                 internal static readonly ulong ImageCache = 1068979750741233786uL;
+                internal static readonly ulong ArtDiscussion = 458428837017944094uL;
             }
         }
 

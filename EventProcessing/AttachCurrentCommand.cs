@@ -11,6 +11,26 @@ namespace ArtSubmissionsBot.EventProcessing
             [Option("message-id", "The ID of the message in #asset-voting you are attaching an asset to")]string id,
             [Option("asset", "The asset currently in-use")]DiscordAttachment attachment)
         {
+            if (ctx.Channel is DiscordDmChannel)
+            {
+                await ctx.CreateResponseAsync("You cannot use this command here!");
+                return;
+            }
+            else if (ctx.Guild.Id != Cache.DevServerID)
+            {
+                var member = await ctx.Guild.GetMemberAsync(ctx.User.Id);
+                if (member.Roles.Any(x => x.Id == Cache.DevRoleID))
+                    await ctx.CreateResponseAsync($"Please only use this command in <#{Cache.Channels.IDs.ArtDiscussion}>!", true);
+                else
+                    await ctx.CreateResponseAsync("This command is only meant for developer use!");
+                return;
+            }
+            else if (ctx.Channel.Id != Cache.Channels.IDs.ArtDiscussion)
+            {
+                await ctx.CreateResponseAsync($"Please only use this command in <#{Cache.Channels.IDs.ArtDiscussion}>!", true);
+                return;
+            }
+
             await ctx.DeferAsync();
 
             // Try to parse the ID and fetch the message
