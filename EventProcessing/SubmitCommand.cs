@@ -37,7 +37,8 @@ namespace ArtSubmissionsBot.EventProcessing
             var displayEmbed = new DiscordEmbedBuilder()
                 .WithAuthor($"Created by: {artist}")
                 .WithTitle(assetName)
-                .WithColor(Cache.Colors.Submitted);
+                .WithColor(Cache.Colors.Submitted)
+                .WithFooter($"Submitted by: {ctx.User.Username}#{ctx.User.Discriminator}");
 
             // Embed the showcase, if it is able to be displayed
             if (display.MediaType.StartsWith("image"))
