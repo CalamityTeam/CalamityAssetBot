@@ -14,6 +14,12 @@ namespace ArtSubmissionsBot.EventProcessing
             [Option("Assets", "If your submission requires multiple files, put them into a .zip and attach it here")] DiscordAttachment assets = null,
             [Option("Notes", "Any additional notes")] string notes = null)
         {
+            if (ctx.Channel.Id != Cache.Channels.IDs.AssetSubmissions)
+            {
+                await ctx.CreateResponseAsync($"Please keep all asset submissions to <#{Cache.Channels.IDs.AssetSubmissions}>!", true);
+                return;
+            }
+
             // Delete the command because it's ugly
             await ctx.CreateResponseAsync(DSharpPlus.InteractionResponseType.DeferredChannelMessageWithSource, null);
             await ctx.DeleteResponseAsync();
@@ -35,7 +41,10 @@ namespace ArtSubmissionsBot.EventProcessing
 
             // Embed the showcase, if it is able to be displayed
             if (display.MediaType.StartsWith("image"))
-                displayEmbed.WithImageUrl(display.Url);
+            {
+                string url = await display.ResetEphemeralAttachmentURL();
+                displayEmbed.WithImageUrl(url);
+            }
 
             // Otherwise just attach it
             else
@@ -53,9 +62,10 @@ namespace ArtSubmissionsBot.EventProcessing
             // If there is a current asset, and it can be embedded, attach it in a separate embed
             if (current != null && current.MediaType.StartsWith("image"))
             {
+                string url = await current.ResetEphemeralAttachmentURL();
                 var currentEmbed = new DiscordEmbedBuilder()
                     .WithTitle("Current")
-                    .WithImageUrl(current.Url)
+                    .WithImageUrl(url)
                     .WithColor(Cache.Colors.Submitted); ;
 
                 message.AddEmbed(currentEmbed);

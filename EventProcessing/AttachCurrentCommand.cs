@@ -38,11 +38,17 @@ namespace ArtSubmissionsBot.EventProcessing
             }
 
             // Create the "current asset" embed
+            string url = await attachment.ResetEphemeralAttachmentURL();
             DiscordMessageBuilder builder = new(message);
+
+            // This line handles both clearing an already assigned current asset
+            // And prepping to attach a new one
             builder.Embed = builder.Embeds[0];
+
+            // Assemble and attach the embed, then edit the message
             var newEmbed = new DiscordEmbedBuilder()
                     .WithTitle("Current")
-                    .WithImageUrl(attachment.Url)
+                    .WithImageUrl(url)
                     .WithColor(builder.Embed.Color.Value);
             builder.AddEmbed(newEmbed);
             await message.ModifyAsync(builder);

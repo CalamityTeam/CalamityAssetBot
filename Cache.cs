@@ -52,12 +52,14 @@ namespace ArtSubmissionsBot
             internal static readonly DiscordChannel AssetSubmissions = DiscordConnection.Client.GetChannelAsync(IDs.AssetSubmissions).GetAwaiter().GetResult();
             internal static readonly DiscordChannel AssetVoting = DiscordConnection.Client.GetChannelAsync(IDs.AssetVoting).GetAwaiter().GetResult();
             internal static readonly DiscordChannel CompletedAssets = DiscordConnection.Client.GetChannelAsync(IDs.CompletedAssets).GetAwaiter().GetResult();
+            internal static readonly DiscordChannel ImageCache = DiscordConnection.Client.GetChannelAsync(IDs.ImageCache).GetAwaiter().GetResult();
 
             internal static class IDs
             {
                 internal static readonly ulong AssetSubmissions = 989751252810334238uL;
                 internal static readonly ulong AssetVoting = 1062226182919180339uL;
                 internal static readonly ulong CompletedAssets = 1062590663394349077uL;
+                internal static readonly ulong ImageCache = 1068979750741233786uL;
             }
         }
 

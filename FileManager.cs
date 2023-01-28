@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.Entities;
 using System.Net;
 using Newtonsoft.Json;
+using System.IO;
 
 namespace ArtSubmissionsBot
 {
@@ -61,6 +62,22 @@ namespace ArtSubmissionsBot
 
             // Add the stream and file location to the dictionary map
             files.Add(stream.Key, stream.Value);
+        }
+
+        internal static async Task<string> ResetEphemeralAttachmentURL(this DiscordAttachment attachment)
+        {
+            // Download the file and reupload it so its ephemeral status is removed
+            var file = await DownloadFileAsync(attachment.Url, attachment.FileName);
+            var builder = new DiscordMessageBuilder()
+                .AddFile(file.Value);
+            var message = await Cache.Channels.ImageCache.SendMessageAsync(builder);
+
+            // After the image is reuploaded, delete it from storage, as now Discord has it
+            await file.Value.DisposeAsync();
+            File.Delete(file.Key);
+
+            // Return the new image url
+            return message.Attachments[0].Url;
         }
     }
 }

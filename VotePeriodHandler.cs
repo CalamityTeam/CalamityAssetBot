@@ -6,7 +6,7 @@ namespace ArtSubmissionsBot
     {
         internal static System.Timers.Timer VoteTallyTimer = new(TimeSpan.FromMinutes(10)) { AutoReset = true };
         internal static TimeSpan Age(this DiscordMessage message) => DateTime.UtcNow - message.Timestamp.UtcDateTime;
-        internal static readonly TimeSpan VotingPeriod = TimeSpan.FromDays(5);
+        internal static readonly TimeSpan VotingPeriod = TimeSpan.FromDays(3);
 
         internal static async Task TallyVotesAsync()
         {
