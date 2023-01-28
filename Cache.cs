@@ -56,9 +56,9 @@ namespace ArtSubmissionsBot
 
             internal static class IDs
             {
-                internal static readonly ulong AssetSubmissions = 989751252810334238uL;
-                internal static readonly ulong AssetVoting = 1062226182919180339uL;
-                internal static readonly ulong CompletedAssets = 1062590663394349077uL;
+                internal static readonly ulong AssetSubmissions = 459252132068065280uL;
+                internal static readonly ulong AssetVoting = 612004648118779904uL;
+                internal static readonly ulong CompletedAssets = 458446442340548639uL;
                 internal static readonly ulong ImageCache = 1068979750741233786uL;
             }
         }
