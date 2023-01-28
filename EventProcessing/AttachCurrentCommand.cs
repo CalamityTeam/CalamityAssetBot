@@ -39,6 +39,8 @@ namespace ArtSubmissionsBot.EventProcessing
             {
                 ulong uid = ulong.Parse(id);
                 message = await Cache.Channels.AssetVoting.GetMessageAsync(uid);
+                if (!message.Author.IsCurrent)
+                    throw new Exception("Message is not from the bot!");
             }
             catch
             {
