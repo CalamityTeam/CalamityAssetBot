@@ -25,13 +25,13 @@ namespace ArtSubmissionsBot
                     // Tally votes
                     List<bool> votes = Cache.VoteCache[message.Id].Values.ToList();
                     int yesCount = votes.Count(x => x);
-                    int noCount = votes.Count(x => !x);
+                    int total = votes.Count;
                     Cache.VoteCache.Remove(message.Id);
 
                     // Forward the message where it needs to go
-                    if (yesCount > noCount + 1)
+                    if (yesCount >= total * (2f / 3f))
                         message = await PassAssetAsync(message);
-                    else if (yesCount >= noCount - 1)
+                    else if (yesCount >= total * 0.5f)
                         message = await CloseRejectAssetAsync(message);
                     else
                         message = await RejectAssetAsync(message);
