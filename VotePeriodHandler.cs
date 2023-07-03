@@ -83,14 +83,19 @@ namespace ArtSubmissionsBot
                 builder.AddEmbed(embed);
             }
 
-            // Copy all attachments
-            Dictionary<string, FileStream> files = new();
-            foreach (var attachment in message.Attachments)
-                await FileManager.AttachFileAsync(attachment, builder, files);
-
+            // Update the public message
+            DiscordMessageBuilder publicBuilder = new(builder);
             ulong publicID = ulong.Parse(message.Components.First().Components.First().CustomId.Replace($"vote_yes_", ""));
             DiscordMessage publicMessage = await Cache.Channels.AssetSubmissions.GetMessageAsync(publicID);
-            await publicMessage.ModifyAsync(builder);
+            await publicMessage.ModifyAsync(publicBuilder);
+
+            // The public message is re-cached to prevent attachments getting messed up
+            publicMessage = await Cache.Channels.AssetSubmissions.GetMessageAsync(publicID);
+
+            // Copy all attachments
+            Dictionary<string, FileStream> files = new();
+            foreach (var attachment in publicMessage.Attachments)
+                await FileManager.AttachFileAsync(attachment, builder, files);
 
             // Add buttons for updating status
             builder.AddComponents(new DiscordComponent[]
@@ -99,7 +104,7 @@ namespace ArtSubmissionsBot
                 Cache.Buttons.MarkImplmented(publicID)
             });
 
-            // Send the new message, cache the new message to evaluate, and delete the old message
+            // Send the new message, cache the next message to evaluate, and delete the old message
             await channel.SendMessageAsync(builder);
             DiscordMessage newMessage = (await Cache.Channels.AssetVoting.GetMessagesBeforeAsync(message.Id))[0];
             await message.DeleteAsync();
