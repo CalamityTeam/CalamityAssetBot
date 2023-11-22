@@ -26,7 +26,6 @@ namespace ArtSubmissionsBot
                     List<bool> votes = Cache.VoteCache[message.Id].Values.ToList();
                     int yesCount = votes.Count(x => x);
                     int total = votes.Count;
-                    Cache.VoteCache.Remove(message.Id);
 
                     // Forward the message where it needs to go
                     if (yesCount >= total * (2f / 3f))
@@ -36,6 +35,7 @@ namespace ArtSubmissionsBot
                     else
                         message = await RejectAssetAsync(message);
 
+                    Cache.VoteCache.Remove(message.Id);
                     continue;
                 }
 
