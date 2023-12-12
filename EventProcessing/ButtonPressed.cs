@@ -35,6 +35,10 @@ namespace ArtSubmissionsBot.EventProcessing
             // Parse the public message ID from the button ID
             // And retrieve the votes
             ulong publicID = ulong.Parse(ctx.Id.Replace($"vote_{(positiveVote ? "yes" : "no")}_", ""));
+
+            if (!Cache.VoteCache.ContainsKey(ctx.Message.Id))
+                Cache.VoteCache.Add(ctx.Message.Id, new());
+
             Dictionary<ulong, bool> votes = Cache.VoteCache[ctx.Message.Id];
 
             // If the user has yet to vote, add it
