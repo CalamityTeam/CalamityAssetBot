@@ -1,11 +1,5 @@
 ﻿using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ArtSubmissionsBot.EventProcessing
 {
@@ -62,7 +56,22 @@ namespace ArtSubmissionsBot.EventProcessing
 
             // Updating the embed is cancer
             // Cache the message and reformat it into a builder
-            DiscordMessage message = await Cache.Channels.AssetSubmissions.GetMessageAsync(publicID);
+            DiscordMessage message;
+
+            try { message = await Cache.Channels.AssetSubmissions.GetMessageAsync(publicID); }
+            catch
+            {
+                await ctx.Interaction.CreateResponseAsync(DSharpPlus.InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                    .WithContent(
+                        "Error encountered when attempting to access the public submission message.\n" +
+                        "Ping Nycro if the cause of this error is not readily apparent."
+                    )
+                    .AsEphemeral(true)
+                );
+
+                return;
+            }
+
             DiscordMessageBuilder builder = new(message);
 
             // Cache the embeds, and specifically set aside the first one

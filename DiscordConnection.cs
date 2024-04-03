@@ -31,6 +31,7 @@ namespace ArtSubmissionsBot
             Slashies.RegisterCommands<AttachCurrentCommand>();
 
             Client.MessageCreated += new((client, args) => MessageCreated.Process(args));
+            Client.MessageDeleted += new((client, args) => MessageDeleted.Process(args));
             Client.ComponentInteractionCreated += new((client, args) => ButtonPressed.Process(args));
 
             await Client.ConnectAsync();
