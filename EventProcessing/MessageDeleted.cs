@@ -8,7 +8,7 @@ namespace ArtSubmissionsBot.EventProcessing
         internal static async Task Process(MessageDeleteEventArgs args)
         {
             // Don't handle DMs
-            if (args.Channel is DiscordDmChannel)
+            if (args.Channel is null || args.Channel is DiscordDmChannel)
                 return;
 
             // If the message was in dev's asset voting and posted by the bot
@@ -53,6 +53,9 @@ namespace ArtSubmissionsBot.EventProcessing
             // If so, don't attempt to delete it
             if (publicMessage is not null)
                 await publicMessage.DeleteAsync();
+
+            if (Cache.VoteCache.ContainsKey(devMessage.Id))
+                Cache.VoteCache.Remove(devMessage.Id);
 
             // If the dev message has not yet been deleted, delete it now
             // Re-fetching the message ensures we don't attempt to delete a message that doesn't exist
