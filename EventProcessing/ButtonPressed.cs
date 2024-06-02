@@ -108,6 +108,24 @@ namespace ArtSubmissionsBot.EventProcessing
 
             // Respond to the interaction
             await ctx.Interaction.CreateResponseAsync(DSharpPlus.InteractionResponseType.UpdateMessage, new(builder));
+
+            if (message.Age() > VotePeriodHandler.VotingPeriod && message.Author.IsCurrent)
+            {
+                // Tally votes
+                List<bool> tally = Cache.VoteCache[message.Id].Values.ToList();
+                int yesCount = tally.Count(x => x);
+                int total = tally.Count;
+
+                // Forward the message where it needs to go
+                if (yesCount >= total * (2f / 3f))
+                    message = await VotePeriodHandler.PassAssetAsync(message);
+                else if (yesCount >= total * 0.5f)
+                    message = await VotePeriodHandler.CloseRejectAssetAsync(message);
+                else
+                    message = await VotePeriodHandler.RejectAssetAsync(message);
+
+                Cache.VoteCache.Remove(message.Id);
+            }
         }
 
         private static async Task UpdateImplemented(ComponentInteractionCreateEventArgs ctx)
