@@ -1,37 +1,48 @@
 ﻿using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
+using DSharpPlus.Commands;
+using System.ComponentModel;
+using DSharpPlus.Commands.ContextChecks;
 
 namespace ArtSubmissionsBot.EventProcessing
 {
-    internal class AttachCurrentCommand : ApplicationCommandModule
+    internal class AttachCurrentCommand
     {
-        [SlashCommandPermissions(DSharpPlus.Permissions.ManageMessages)]
-        [SlashCommand("attachasset", "Attaches or updates a submission's currently in-use asset")]
-        public async Task AttachAssetAsync(InteractionContext ctx,
-            [Option("message-id", "The ID of the message in #asset-voting you are attaching an asset to")]string id,
-            [Option("asset", "The asset currently in-use")]DiscordAttachment attachment)
+        [Command("attachasset")]
+        [Description("Attaches or updates a submission's currently in-use asset")]
+        [RequirePermissions(DiscordPermissions.ManageMessages)]
+        public async Task AttachAssetAsync(CommandContext ctx,
+
+            [Parameter("message-id")]
+            [Description("The ID of the message in #asset-voting you are attaching an asset to")]
+            string id,
+
+            [Parameter("asset")]
+            [Description("The asset currently in-use")]
+            DiscordAttachment attachment)
         {
             if (ctx.Channel is DiscordDmChannel)
             {
-                await ctx.CreateResponseAsync("You cannot use this command here!");
+                await ctx.RespondAsync("You cannot use this command here!");
                 return;
             }
-            else if (ctx.Guild.Id != Cache.DevServerID)
+
+            else if ((ctx.Guild?.Id ?? 0uL) != Cache.DevServerID)
             {
-                var member = await ctx.Guild.GetMemberAsync(ctx.User.Id);
+                var member = await ctx.Guild!.GetMemberAsync(ctx.User.Id);
                 if (member.Roles.Any(x => x.Id == Cache.DevRoleID))
                     await ctx.CreateResponseAsync($"Please only use this command in <#{Cache.Channels.IDs.ArtDiscussion}>!", true);
                 else
                     await ctx.CreateResponseAsync("This command is only meant for developer use!");
                 return;
             }
+
             else if (ctx.Channel.Id != Cache.Channels.IDs.ArtDiscussion)
             {
                 await ctx.CreateResponseAsync($"Please only use this command in <#{Cache.Channels.IDs.ArtDiscussion}>!", true);
                 return;
             }
 
-            await ctx.DeferAsync();
+            await ctx.DeferResponseAsync();
 
             // Try to parse the ID and fetch the message
             DiscordMessage message;
