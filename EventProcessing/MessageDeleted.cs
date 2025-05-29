@@ -5,7 +5,7 @@ namespace ArtSubmissionsBot.EventProcessing
 {
     internal class MessageDeleted
     {
-        internal static async Task Process(MessageDeleteEventArgs args)
+        internal static async Task Process(MessageDeletedEventArgs args)
         {
             // Don't handle DMs
             if (args.Channel is null || args.Channel is DiscordDmChannel)
@@ -22,7 +22,7 @@ namespace ArtSubmissionsBot.EventProcessing
             if (args.Channel.Id == Cache.Channels.IDs.AssetSubmissions && args.Message.Author.IsCurrent)
             {
                 // Iterate through the 100 most recent submissions in dev to see if any are the corresponding dev voting message
-                foreach (var message in await Cache.Channels.AssetVoting.GetMessagesAsync(100))
+                await foreach (var message in Cache.Channels.AssetVoting.GetMessagesAsync(100))
                 {
                     // If there are no message components, that means either the vote has concluded, or
                     // it was posted by another dev and not the bot

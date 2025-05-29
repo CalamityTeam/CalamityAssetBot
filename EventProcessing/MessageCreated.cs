@@ -3,7 +3,7 @@ namespace ArtSubmissionsBot.EventProcessing
 {
     internal static class MessageCreated
     {
-        internal static async Task Process(MessageCreateEventArgs args)
+        internal static async Task Process(MessageCreatedEventArgs args)
         {
             // Delete any messages sent in the asset submission channels that aren't command executions
             if (!args.Message.Author.IsCurrent && args.Channel.Id == Cache.Channels.AssetSubmissions.Id)

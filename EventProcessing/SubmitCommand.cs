@@ -85,11 +85,7 @@ namespace ArtSubmissionsBot.EventProcessing
 
             // Add voting buttons
             // The message ID of the public message is cached in the buttons' custom IDs
-            message.AddComponents(new DiscordComponent[]
-            {
-                    Cache.Buttons.VoteYes(sent.Id),
-                    Cache.Buttons.VoteNo(sent.Id)
-            });
+            message.AddActionRowComponent(Cache.Buttons.VoteYes(sent.Id), Cache.Buttons.VoteNo(sent.Id));
 
             // Send in dev
             DiscordMessage dev = await Cache.Channels.AssetVoting.SendMessageAsync(message);

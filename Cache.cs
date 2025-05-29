@@ -11,10 +11,10 @@ namespace ArtSubmissionsBot
 
         internal static class Buttons
         {
-            internal static DiscordButtonComponent VoteYes(ulong mID) => new(DSharpPlus.ButtonStyle.Success, $"vote_yes_{mID}", "", false, new(Emojis.VoteYesButton));
-            internal static DiscordButtonComponent VoteNo(ulong mID) => new(DSharpPlus.ButtonStyle.Danger, $"vote_no_{mID}", "", false, new(Emojis.VoteNoButton));
-            internal static DiscordButtonComponent MarkUnimplemented(ulong mID) => new(DSharpPlus.ButtonStyle.Secondary, $"mark_unimplemented_{mID}", "", false, new(Emojis.Submitted));
-            internal static DiscordButtonComponent MarkImplmented(ulong mID) => new(DSharpPlus.ButtonStyle.Secondary, $"mark_implemented_{mID}", "", false, new (Emojis.Implemented));
+            internal static DiscordButtonComponent VoteYes(ulong mID) => new(DiscordButtonStyle.Success, $"vote_yes_{mID}", "", false, new(Emojis.VoteYesButton));
+            internal static DiscordButtonComponent VoteNo(ulong mID) => new(DiscordButtonStyle.Danger, $"vote_no_{mID}", "", false, new(Emojis.VoteNoButton));
+            internal static DiscordButtonComponent MarkUnimplemented(ulong mID) => new(DiscordButtonStyle.Secondary, $"mark_unimplemented_{mID}", "", false, new(Emojis.Submitted));
+            internal static DiscordButtonComponent MarkImplmented(ulong mID) => new(DiscordButtonStyle.Secondary, $"mark_implemented_{mID}", "", false, new (Emojis.Implemented));
         }
 
         internal static class Emojis

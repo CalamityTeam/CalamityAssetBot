@@ -9,7 +9,7 @@ namespace ArtSubmissionsBot.EventProcessing
     {
         [Command("attachasset")]
         [Description("Attaches or updates a submission's currently in-use asset")]
-        [RequirePermissions(DiscordPermissions.ManageMessages)]
+        [RequirePermissions(DiscordPermission.ManageMessages)]
         public async Task AttachAssetAsync(CommandContext ctx,
 
             [Parameter("message-id")]
@@ -30,15 +30,24 @@ namespace ArtSubmissionsBot.EventProcessing
             {
                 var member = await ctx.Guild!.GetMemberAsync(ctx.User.Id);
                 if (member.Roles.Any(x => x.Id == Cache.DevRoleID))
-                    await ctx.CreateResponseAsync($"Please only use this command in <#{Cache.Channels.IDs.ArtDiscussion}>!", true);
+                    await ctx.RespondAsync(new DiscordInteractionResponseBuilder()
+                        .WithContent($"Please only use this command in <#{Cache.Channels.IDs.ArtDiscussion}>!")
+                        .AsEphemeral());
+                
                 else
-                    await ctx.CreateResponseAsync("This command is only meant for developer use!");
+                    await ctx.RespondAsync(new DiscordInteractionResponseBuilder()
+                        .WithContent("This command is only meant for developer use!")
+                        .AsEphemeral());
+                
                 return;
             }
 
             else if (ctx.Channel.Id != Cache.Channels.IDs.ArtDiscussion)
             {
-                await ctx.CreateResponseAsync($"Please only use this command in <#{Cache.Channels.IDs.ArtDiscussion}>!", true);
+                await ctx.RespondAsync(new DiscordInteractionResponseBuilder()
+                    .WithContent($"Please only use this command in <#{Cache.Channels.IDs.ArtDiscussion}>!")
+                    .AsEphemeral());
+                
                 return;
             }
 
@@ -55,18 +64,16 @@ namespace ArtSubmissionsBot.EventProcessing
             }
             catch
             {
-                await ctx.EditResponseAsync(new() { Content = "Message not found!" });
+                await ctx.EditResponseAsync("Message not found!");
                 return;
             }
 
             // See `Content`
             if (!attachment.MediaType.StartsWith("image"))
             {
-                await ctx.EditResponseAsync(new()
-                {
-                    Content = "Unfortunately, only embed-able images and gifs can be attached as current assets\n" +
-                    "(You can't upload a file to a message that's already been sent)"
-                });
+                await ctx.EditResponseAsync(
+                    "Unfortunately, only embed-able images and gifs can be attached as current assets\n" +
+                    "(You can't upload a file to a message that's already been sent)");
                 return;
             }
 
@@ -76,13 +83,14 @@ namespace ArtSubmissionsBot.EventProcessing
 
             // This line handles both clearing an already assigned current asset
             // And prepping to attach a new one
-            builder.Embed = builder.Embeds[0];
+            builder.SetEmbed(builder.Embeds[0]);
 
             // Assemble and attach the embed, then edit the message
             var newEmbed = new DiscordEmbedBuilder()
                     .WithTitle("Current")
                     .WithImageUrl(url)
-                    .WithColor(builder.Embed.Color.Value);
+                    .WithColor(builder.Embeds[0].Color.Value);
+            
             builder.AddEmbed(newEmbed);
             await message.ModifyAsync(builder);
 
@@ -91,17 +99,17 @@ namespace ArtSubmissionsBot.EventProcessing
             // So just return early
             if (!message.Components.Any())
             {
-                await ctx.EditResponseAsync(new() { Content = "Done!" });
+                await ctx.EditResponseAsync("Done!");
                 return;
             }
 
             // Parse the ID, clear the components, and update
-            ulong publicID = ulong.Parse(message.Components.First().Components.First().CustomId.Replace($"vote_yes_", ""));
+            ulong publicID = ulong.Parse(message.ComponentActionRows.First().Components.First().CustomId.Replace($"vote_yes_", ""));
             DiscordMessage publicMessage = await Cache.Channels.AssetSubmissions.GetMessageAsync(publicID);
             builder.ClearComponents();
             await publicMessage.ModifyAsync(builder);
 
-            await ctx.EditResponseAsync(new() { Content = "Done!" });
+            await ctx.EditResponseAsync("Done!");
         }
     }
 }

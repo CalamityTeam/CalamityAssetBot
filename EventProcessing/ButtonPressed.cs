@@ -5,7 +5,7 @@ namespace ArtSubmissionsBot.EventProcessing
 {
     internal static class ButtonPressed
     {
-        internal static async Task Process(ComponentInteractionCreateEventArgs ctx)
+        internal static async Task Process(ComponentInteractionCreatedEventArgs ctx)
         {
             // Check whether the vote was positive or negative
             bool positiveVote;
@@ -61,12 +61,11 @@ namespace ArtSubmissionsBot.EventProcessing
             try { message = await Cache.Channels.AssetSubmissions.GetMessageAsync(publicID); }
             catch
             {
-                await ctx.Interaction.CreateResponseAsync(DSharpPlus.InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
                     .WithContent(
                         "Error encountered when attempting to access the public submission message.\n" +
-                        "Ping Nycro if the cause of this error is not readily apparent."
-                    )
-                    .AsEphemeral(true)
+                        "Ping Nycro if the cause of this error is not readily apparent.")
+                    .AsEphemeral()
                 );
 
                 return;
@@ -92,7 +91,8 @@ namespace ArtSubmissionsBot.EventProcessing
             }
 
             // Reset the message's embeds and re-add them
-            builder.Embed = embed;
+            builder.SetEmbed(embed);
+            
             foreach (var em in embeds)
                 builder.AddEmbed(em);
 
@@ -100,14 +100,10 @@ namespace ArtSubmissionsBot.EventProcessing
             await message.ModifyAsync(builder);
 
             // Re-add buttons
-            builder.AddComponents(new DiscordComponent[]
-            {
-                Cache.Buttons.VoteYes(publicID),
-                Cache.Buttons.VoteNo(publicID)
-            });
+            builder.AddActionRowComponent(Cache.Buttons.VoteYes(publicID), Cache.Buttons.VoteNo(publicID));
 
             // Respond to the interaction
-            await ctx.Interaction.CreateResponseAsync(DSharpPlus.InteractionResponseType.UpdateMessage, new(builder));
+            await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.UpdateMessage, new(builder));
 
             if (message.Age() > VotePeriodHandler.VotingPeriod && message.Author.IsCurrent)
             {
@@ -128,10 +124,10 @@ namespace ArtSubmissionsBot.EventProcessing
             }
         }
 
-        private static async Task UpdateImplemented(ComponentInteractionCreateEventArgs ctx)
+        private static async Task UpdateImplemented(ComponentInteractionCreatedEventArgs ctx)
         {
             // If the user reacts with the button that wouldn't change the status of the embed, ignore it
-            await ctx.Interaction.CreateResponseAsync(DSharpPlus.InteractionResponseType.DeferredMessageUpdate);
+            await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredMessageUpdate);
             bool implemented = ctx.Id.StartsWith("mark_i");
             if ((implemented && ctx.Message.Embeds[0].Color.Value.Value == Cache.Colors.Implemented.Value) ||
                 (!implemented && ctx.Message.Embeds[0].Color.Value.Value == Cache.Colors.Accepted.Value))
@@ -163,7 +159,8 @@ namespace ArtSubmissionsBot.EventProcessing
                 }
 
                 if (embeds.IndexOf(em) == 0)
-                    builder.Embed = embed;
+                    builder.SetEmbed(embed);
+
                 else
                     builder.AddEmbed(embed);
             }

@@ -1,5 +1,6 @@
 ﻿using ArtSubmissionsBot.EventProcessing;
 using DSharpPlus;
+using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Newtonsoft.Json;
 
@@ -37,6 +38,12 @@ namespace ArtSubmissionsBot
             await Client.ConnectAsync();
             VotePeriodHandler.VoteTallyTimer.Start();
             await Task.Delay(-1);
+        }
+
+        internal static void SetEmbed(this DiscordMessageBuilder builder, DiscordEmbed embed)
+        {
+            builder.ClearEmbeds();
+            builder.AddEmbed(embed);
         }
     }
 }

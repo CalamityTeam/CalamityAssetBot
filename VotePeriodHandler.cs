@@ -11,7 +11,7 @@ namespace ArtSubmissionsBot
         internal static async Task TallyVotesAsync()
         {
             // Cache the latest message
-            DiscordMessage message = (await Cache.Channels.AssetVoting.GetMessagesAsync(1))[0];
+            DiscordMessage message = Cache.Channels.AssetVoting.GetMessagesAsync(1).ToBlockingEnumerable().First();
 
             // Ladder through all messages that are younger than voting period length
             while (message.Age() < VotingPeriod ||
@@ -40,7 +40,7 @@ namespace ArtSubmissionsBot
                 }
 
                 // Ladder to the next message
-                message = (await Cache.Channels.AssetVoting.GetMessagesBeforeAsync(message.Id))[0];
+                message = await Cache.Channels.AssetVoting.GetMessagesBeforeAsync(message.Id).FirstAsync();
 
                 // Arbitrary non-bot message to stop the ladder
                 if (message.Id == 1061791436971982908uL)
@@ -85,7 +85,7 @@ namespace ArtSubmissionsBot
 
             // Update the public message
             DiscordMessageBuilder publicBuilder = new(builder);
-            ulong publicID = ulong.Parse(message.Components.First().Components.First().CustomId.Replace($"vote_yes_", ""));
+            ulong publicID = ulong.Parse(message.ComponentActionRows.First().Components.First().CustomId.Replace($"vote_yes_", ""));
             DiscordMessage publicMessage = await Cache.Channels.AssetSubmissions.GetMessageAsync(publicID);
             await publicMessage.ModifyAsync(publicBuilder);
 
@@ -98,7 +98,7 @@ namespace ArtSubmissionsBot
                 await FileManager.AttachFileAsync(attachment, builder, files);
 
             // Add buttons for updating status
-            builder.AddComponents(new DiscordComponent[]
+            builder.AddActionRowComponent(new[]
             {
                 Cache.Buttons.MarkUnimplemented(publicID),
                 Cache.Buttons.MarkImplmented(publicID)
@@ -106,7 +106,7 @@ namespace ArtSubmissionsBot
 
             // Send the new message, cache the next message to evaluate, and delete the old message
             await channel.SendMessageAsync(builder);
-            DiscordMessage newMessage = (await Cache.Channels.AssetVoting.GetMessagesBeforeAsync(message.Id))[0];
+            DiscordMessage newMessage = await Cache.Channels.AssetVoting.GetMessagesBeforeAsync(message.Id).FirstAsync();
             await message.DeleteAsync();
 
             // Delete all files
@@ -122,7 +122,7 @@ namespace ArtSubmissionsBot
 
         private static async Task<DiscordMessage> UpdateAssetAsync(DiscordMessage message, DiscordColor color)
         {
-            ulong publicID = ulong.Parse(message.Components.First().Components.First().CustomId.Replace($"vote_yes_", ""));
+            ulong publicID = ulong.Parse(message.ComponentActionRows.First().Components.First().CustomId.Replace($"vote_yes_", ""));
 
             // Updating the embed is cancer
             // Cache the message and reformat it into a builder
@@ -142,9 +142,9 @@ namespace ArtSubmissionsBot
                     else
                         embed.AddField(field.Name, field.Value, field.Inline);
                 }
-
+                
                 if (embeds.IndexOf(em) == 0)
-                    builder.Embed = embed;
+                    builder.SetEmbed(embed);
                 else
                     builder.AddEmbed(embed);
             }
@@ -158,7 +158,7 @@ namespace ArtSubmissionsBot
             DiscordMessage publicMessage = await Cache.Channels.AssetSubmissions.GetMessageAsync(publicID);
             await publicMessage.ModifyAsync(builder);
 
-            return (await Cache.Channels.AssetVoting.GetMessagesBeforeAsync(message.Id))[0];
+            return await Cache.Channels.AssetVoting.GetMessagesBeforeAsync(message.Id).FirstAsync();
         }
     }
 }
