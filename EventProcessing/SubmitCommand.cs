@@ -1,27 +1,47 @@
-﻿using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
+﻿using System.ComponentModel;
+using DSharpPlus.Entities;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.Processors.SlashCommands;
 
 namespace ArtSubmissionsBot.EventProcessing
 {
-    internal class SubmitCommand : ApplicationCommandModule
+    internal class SubmitCommand
     {
-        [SlashCommand("submit", "Submits an asset")]
-        internal async Task SubmitAsync(InteractionContext ctx,
-            [Option("Artist", "The artist's name (include all names if there are multiple contributors)")] string artist,
-            [Option("Asset-Name", "The asset you are submitting")] string assetName,
-            [Option("Display", "The file you want to represent your submission (like a showcase)")] DiscordAttachment display,
-            [Option("Current-Asset", "If the asset already exists in-game, you can optionally attach it here")] DiscordAttachment current = null,
-            [Option("Assets", "If your submission requires multiple files, put them into a .zip and attach it here")] DiscordAttachment assets = null,
-            [Option("Notes", "Any additional notes")] string notes = null)
+        [Command("submit")]
+        [Description("Submits an asset")]
+        internal async Task SubmitAsync(SlashCommandContext ctx,
+            [Parameter("Artist")]
+            [Description("The artist's name (include all names if there are multiple contributors)")]
+            string artist,
+            
+            [Parameter("Asset-Name")]
+            [Description("The asset you are submitting")]
+            string assetName,
+            
+            [Parameter("Display")]
+            [Description("The file you want to represent your submission (like a showcase)")]
+            DiscordAttachment display,
+            
+            [Parameter("Current-Asset")]
+            [Description("If the asset already exists in-game, you can optionally attach it here")]
+            DiscordAttachment current = null,
+            
+            [Parameter("Assets")]
+            [Description("If your submission requires multiple files, put them into a .zip and attach it here")]
+            DiscordAttachment assets = null,
+            
+            [Parameter("Notes")]
+            [Description("Any additional notes")]
+            string notes = null)
         {
             if (ctx.Channel.Id != Cache.Channels.IDs.AssetSubmissions)
             {
-                await ctx.CreateResponseAsync($"Please keep all asset submissions to <#{Cache.Channels.IDs.AssetSubmissions}>!", true);
+                await ctx.RespondAsync($"Please keep all asset submissions to <#{Cache.Channels.IDs.AssetSubmissions}>!", true);
                 return;
             }
 
             // Delete the command because it's ugly
-            await ctx.CreateResponseAsync(DSharpPlus.InteractionResponseType.DeferredChannelMessageWithSource, null);
+            await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource);
             await ctx.DeleteResponseAsync();
 
             // Sometimes Discord closes this gateway

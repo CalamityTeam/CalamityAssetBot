@@ -2,6 +2,7 @@
 using DSharpPlus.Commands;
 using System.ComponentModel;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 
 namespace ArtSubmissionsBot.EventProcessing
 {
@@ -10,8 +11,7 @@ namespace ArtSubmissionsBot.EventProcessing
         [Command("attachasset")]
         [Description("Attaches or updates a submission's currently in-use asset")]
         [RequirePermissions(DiscordPermission.ManageMessages)]
-        public async Task AttachAssetAsync(CommandContext ctx,
-
+        public async Task AttachAssetAsync(SlashCommandContext ctx,
             [Parameter("message-id")]
             [Description("The ID of the message in #asset-voting you are attaching an asset to")]
             string id,
@@ -30,24 +30,17 @@ namespace ArtSubmissionsBot.EventProcessing
             {
                 var member = await ctx.Guild!.GetMemberAsync(ctx.User.Id);
                 if (member.Roles.Any(x => x.Id == Cache.DevRoleID))
-                    await ctx.RespondAsync(new DiscordInteractionResponseBuilder()
-                        .WithContent($"Please only use this command in <#{Cache.Channels.IDs.ArtDiscussion}>!")
-                        .AsEphemeral());
+                    await ctx.RespondAsync($"Please only use this command in <#{Cache.Channels.IDs.ArtDiscussion}>!", true);
                 
                 else
-                    await ctx.RespondAsync(new DiscordInteractionResponseBuilder()
-                        .WithContent("This command is only meant for developer use!")
-                        .AsEphemeral());
+                    await ctx.RespondAsync("This command is only meant for developer use!", true);
                 
                 return;
             }
 
             else if (ctx.Channel.Id != Cache.Channels.IDs.ArtDiscussion)
             {
-                await ctx.RespondAsync(new DiscordInteractionResponseBuilder()
-                    .WithContent($"Please only use this command in <#{Cache.Channels.IDs.ArtDiscussion}>!")
-                    .AsEphemeral());
-                
+                await ctx.RespondAsync($"Please only use this command in <#{Cache.Channels.IDs.ArtDiscussion}>!", true);
                 return;
             }
 
@@ -59,6 +52,7 @@ namespace ArtSubmissionsBot.EventProcessing
             {
                 ulong uid = ulong.Parse(id);
                 message = await Cache.Channels.AssetVoting.GetMessageAsync(uid);
+                
                 if (!message.Author.IsCurrent)
                     throw new Exception("Message is not from the bot!");
             }
