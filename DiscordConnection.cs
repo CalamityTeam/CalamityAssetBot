@@ -23,7 +23,6 @@ namespace ArtSubmissionsBot
         {
             StartupTime = DateTime.UtcNow;
             VotePeriodHandler.VoteTallyTimer.Elapsed += new((s, e) => VotePeriodHandler.TallyVotesAsync().GetAwaiter().GetResult());
-            FileManager.LoadVoteCache();
 
             var builder = new HostApplicationBuilder();
 
@@ -34,6 +33,7 @@ namespace ArtSubmissionsBot
             {
                 events.HandleMessageCreated(async (_, args) => await MessageCreated.Process(args));
                 events.HandleMessageDeleted(async (_, args) => await MessageDeleted.Process(args));
+                events.HandleMessageReactionAdded(async (_, args) => await ReactionAdded.Process(args));
                 events.HandleComponentInteractionCreated(async (_, args) => await ButtonPressed.Process(args));
             });
 

@@ -9,9 +9,6 @@ namespace ArtSubmissionsBot
     {
         internal static readonly string FolderPath = $"{DiscordConnection.FilePrefix}ReuploadFiles/";
 
-        internal static void SaveVoteCache() => File.WriteAllText($"{DiscordConnection.FilePrefix}VoteCache.json", JsonConvert.SerializeObject(Cache.VoteCache));
-        internal static void LoadVoteCache() => Cache.VoteCache = JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<ulong, bool>>>(File.ReadAllText($"{DiscordConnection.FilePrefix}VoteCache.json")) ?? new();
-
         internal static async Task<KeyValuePair<string, FileStream>> DownloadFileAsync(string url, string fileName)
         {
             // Prepare downloading tools

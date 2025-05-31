@@ -11,7 +11,7 @@ namespace ArtSubmissionsBot
         internal static async Task TallyVotesAsync()
         {
             // Cache the latest message
-            DiscordMessage message = Cache.Channels.AssetVoting.GetMessagesAsync(1).ToBlockingEnumerable().First();
+            DiscordMessage message = await Cache.Channels.AssetVoting.GetMessagesAsync(1).FirstAsync();
 
             // Ladder through all messages that are younger than voting period length
             while (message.Age() < VotingPeriod ||
@@ -23,19 +23,19 @@ namespace ArtSubmissionsBot
                 if (message.Age() > VotingPeriod && message.Author.IsCurrent)
                 {
                     // Tally votes
-                    List<bool> votes = Cache.VoteCache[message.Id].Values.ToList();
-                    int yesCount = votes.Count(x => x);
-                    int total = votes.Count;
+                    int positiveVotes = await message.GetReactionsAsync(Cache.Emojis.PositiveVotes).Where(x => !x.IsCurrent).CountAsync();
+                    int improvementVotes = await message.GetReactionsAsync(Cache.Emojis.ImprovementVotes).Where(x => !x.IsCurrent).CountAsync();
+                    int negativeVotes = await message.GetReactionsAsync(Cache.Emojis.NegativeVotes).Where(x => !x.IsCurrent).CountAsync();
+                    int totalVotes = positiveVotes + improvementVotes + negativeVotes;
 
                     // Forward the message where it needs to go
-                    if (yesCount >= total * (2f / 3f))
+                    if (positiveVotes >= totalVotes * (2f / 3f))
                         message = await PassAssetAsync(message);
-                    else if (yesCount >= total * 0.5f)
+                    else if (positiveVotes >= totalVotes * 0.5f)
                         message = await CloseRejectAssetAsync(message);
                     else
                         message = await RejectAssetAsync(message);
-
-                    Cache.VoteCache.Remove(message.Id);
+                    
                     continue;
                 }
 
@@ -84,16 +84,16 @@ namespace ArtSubmissionsBot
             }
 
             // Update the public message
-            DiscordMessageBuilder publicBuilder = new(builder);
-            ulong publicID = ulong.Parse(message.ComponentActionRows.First().Components.First().CustomId.Replace($"vote_yes_", ""));
+            ulong publicID = ulong.Parse(message.Embeds[0].Footer.Text);
             DiscordMessage publicMessage = await Cache.Channels.AssetSubmissions.GetMessageAsync(publicID);
-            await publicMessage.ModifyAsync(publicBuilder);
+            await publicMessage.ModifyAsync(builder);
 
             // The public message is re-cached to prevent attachments getting messed up
             publicMessage = await Cache.Channels.AssetSubmissions.GetMessageAsync(publicID);
 
             // Copy all attachments
             Dictionary<string, FileStream> files = new();
+            
             foreach (var attachment in publicMessage.Attachments)
                 await FileManager.AttachFileAsync(attachment, builder, files);
 
@@ -122,7 +122,7 @@ namespace ArtSubmissionsBot
 
         private static async Task<DiscordMessage> UpdateAssetAsync(DiscordMessage message, DiscordColor color)
         {
-            ulong publicID = ulong.Parse(message.ComponentActionRows.First().Components.First().CustomId.Replace($"vote_yes_", ""));
+            ulong publicID = ulong.Parse(message.Embeds[0].Footer.Text);
 
             // Updating the embed is cancer
             // Cache the message and reformat it into a builder

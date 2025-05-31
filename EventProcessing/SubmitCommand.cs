@@ -51,7 +51,8 @@ namespace ArtSubmissionsBot.EventProcessing
             var message = new DiscordMessageBuilder();
 
             // Keep a list of all active streams to easily dispose of them after they're used
-            Dictionary<string, FileStream> streams = new Dictionary<string, FileStream>();
+            Dictionary<string, FileStream> streams = [];
+            List<DiscordEmbedBuilder> embeds = [];
 
             // Initialize the showcase embed
             var displayEmbed = new DiscordEmbedBuilder()
@@ -74,11 +75,12 @@ namespace ArtSubmissionsBot.EventProcessing
             // Attach notes, if any, and set up the voting template
             if (!string.IsNullOrWhiteSpace(notes))
                 displayEmbed.AddField($"{Cache.Emojis.Notes} Notes", notes, false);
+            
             displayEmbed.AddField($"{Cache.Emojis.Status} Status", $"Submitted", true);
-            displayEmbed.AddField($"{Cache.Emojis.Votes} Votes", $"{Cache.Emojis.VoteYes} 0 - 0 {Cache.Emojis.VoteNo}", true);
+            displayEmbed.AddField($"{Cache.Emojis.Votes} Votes", $"{Cache.Emojis.PositiveVotes} **0** -- {Cache.Emojis.ImprovementVotes} **0** -- {Cache.Emojis.NegativeVotes} **0**", true);
 
             // Attach the display embed to the message
-            message.AddEmbed(displayEmbed);
+            embeds.Add(displayEmbed);
 
             // If there is a current asset, and it can be embedded, attach it in a separate embed
             if (current != null && current.MediaType.StartsWith("image"))
@@ -89,7 +91,7 @@ namespace ArtSubmissionsBot.EventProcessing
                     .WithImageUrl(url)
                     .WithColor(Cache.Colors.Submitted); ;
 
-                message.AddEmbed(currentEmbed);
+                embeds.Add(currentEmbed);
             }
 
             // Otherwise just attach it
@@ -101,18 +103,22 @@ namespace ArtSubmissionsBot.EventProcessing
                 await FileManager.AttachFileAsync(assets, message, streams, "Assets");
 
             // Send the message in art
+            message.AddEmbeds(embeds.Select(b => b.Build()));
             var sent = await ctx.Channel.SendMessageAsync(message);
-
+            
+            message.ClearEmbeds();
+            embeds[0].Footer = new() { Text = sent.Id.ToString() };
+            
+            // Send in dev
+            message.AddEmbeds(embeds.Select(b => b.Build()));
+            DiscordMessage dev = await Cache.Channels.AssetVoting.SendMessageAsync(message);
+            
             // Add voting buttons
             // The message ID of the public message is cached in the buttons' custom IDs
-            message.AddActionRowComponent(Cache.Buttons.VoteYes(sent.Id), Cache.Buttons.VoteNo(sent.Id));
-
-            // Send in dev
-            DiscordMessage dev = await Cache.Channels.AssetVoting.SendMessageAsync(message);
-
-            // Update vote cache
-            Cache.VoteCache.Add(dev.Id, new());
-            FileManager.SaveVoteCache();
+            await dev.CreateReactionAsync(Cache.Emojis.VoteYesButton);
+            await dev.CreateReactionAsync(Cache.Emojis.NeedsImprovementButton);
+            await dev.CreateReactionAsync(Cache.Emojis.VoteNoButton);
+            await dev.CreateReactionAsync(Cache.Emojis.NeutralButton);
 
             // Delete files
             foreach (var stream in streams)

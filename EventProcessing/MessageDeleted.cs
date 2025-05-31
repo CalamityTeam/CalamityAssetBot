@@ -26,16 +26,17 @@ namespace ArtSubmissionsBot.EventProcessing
                 {
                     // If there are no message components, that means either the vote has concluded, or
                     // it was posted by another dev and not the bot
-                    if (message.Components.Count <= 0)
+                    if (!message.Author.IsCurrent || !message.Reactions.Any())
                         continue;
 
                     // Parse the art server ID to check
-                    ulong publicID = ulong.Parse(message.Components.First().CustomId.Replace($"vote_yes_", ""));
-                    if (publicID == args.Message.Id)
-                    {
-                        await RemoveSubmission(message);
-                        return;
-                    }
+                    ulong publicID = ulong.Parse(message.Embeds[0].Footer.Text);
+                    
+                    if (publicID != args.Message.Id)
+                        continue;
+                    
+                    await RemoveSubmission(message);
+                    return;
                 }
             }
         }
@@ -44,7 +45,7 @@ namespace ArtSubmissionsBot.EventProcessing
         {
             // Fetch the public message
             DiscordMessage? publicMessage = null;
-            ulong publicID = ulong.Parse(devMessage.Components.First().CustomId.Replace($"vote_yes_", ""));
+            ulong publicID = ulong.Parse(devMessage.Embeds[0].Footer.Text);
 
             try { publicMessage = await Cache.Channels.AssetSubmissions.GetMessageAsync(publicID); }
             catch { }
@@ -53,9 +54,6 @@ namespace ArtSubmissionsBot.EventProcessing
             // If so, don't attempt to delete it
             if (publicMessage is not null)
                 await publicMessage.DeleteAsync();
-
-            if (Cache.VoteCache.ContainsKey(devMessage.Id))
-                Cache.VoteCache.Remove(devMessage.Id);
 
             // If the dev message has not yet been deleted, delete it now
             // Re-fetching the message ensures we don't attempt to delete a message that doesn't exist

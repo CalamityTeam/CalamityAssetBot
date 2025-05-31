@@ -29,6 +29,7 @@ namespace ArtSubmissionsBot.EventProcessing
             else if ((ctx.Guild?.Id ?? 0uL) != Cache.DevServerID)
             {
                 var member = await ctx.Guild!.GetMemberAsync(ctx.User.Id);
+                
                 if (member.Roles.Any(x => x.Id == Cache.DevRoleID))
                     await ctx.RespondAsync($"Please only use this command in <#{Cache.Channels.IDs.ArtDiscussion}>!", true);
                 
@@ -98,7 +99,7 @@ namespace ArtSubmissionsBot.EventProcessing
             }
 
             // Parse the ID, clear the components, and update
-            ulong publicID = ulong.Parse(message.ComponentActionRows.First().Components.First().CustomId.Replace($"vote_yes_", ""));
+            ulong publicID = ulong.Parse(message.Embeds[0].Footer.Text);
             DiscordMessage publicMessage = await Cache.Channels.AssetSubmissions.GetMessageAsync(publicID);
             builder.ClearComponents();
             await publicMessage.ModifyAsync(builder);
