@@ -28,13 +28,14 @@ namespace ArtSubmissionsBot
             internal static readonly DiscordEmoji VoteNoButton = DiscordEmoji.FromGuildEmote(DiscordConnection.Client, IDs.VoteNoButton);
             internal static readonly DiscordEmoji NeedsImprovementButton = DiscordEmoji.FromName(DiscordConnection.Client, IDs.NeedsImprovementButton);
             internal static readonly DiscordEmoji NeutralButton = DiscordEmoji.FromGuildEmote(DiscordConnection.Client, IDs.NeutralButton);
+            internal static readonly DiscordEmoji DevFeedback = DiscordEmoji.FromName(DiscordConnection.Client, IDs.DevFeedback);
 
             internal static class IDs
             {
                 internal static readonly string Submitted = ":white_check_mark:";
                 internal static readonly string Implemented = ":checkered_flag:";
                 internal static readonly string PositiveVotes = ":white_check_mark:";
-                internal static readonly string ImprovementVotes = ":pencil:";
+                internal static readonly string ImprovementVotes = ":tools:";
                 internal static readonly string NegativeVotes = ":x:";
                 internal static readonly string Status = ":cyclone:";
                 internal static readonly string Votes = ":ballot_box:";
@@ -43,6 +44,7 @@ namespace ArtSubmissionsBot
                 internal static readonly string NeedsImprovementButton = ":twisted_rightwards_arrows:";
                 internal static readonly ulong VoteNoButton = 1097490848742117458uL;
                 internal static readonly ulong NeutralButton = 1097490850285625424uL;
+                internal static readonly string DevFeedback = ":pencil:";
             }
         }
 
