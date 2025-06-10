@@ -1,78 +1,128 @@
-﻿using DSharpPlus.Entities;
+﻿using CalamityAssetBot.Commands;
+using CalamityAssetBot.Hosting;
+using DSharpPlus;
+using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
+using JetBrains.Annotations;
+using Microsoft.Extensions.Hosting;
 
-namespace ArtSubmissionsBot
+namespace CalamityAssetBot;
+
+[UsedImplicitly]
+public class Cache : BackgroundService
 {
-    internal static class Cache
+    public Cache(DiscordClient client) => source.SetResult(client);
+    protected override Task ExecuteAsync(CancellationToken stoppingToken) => Task.Delay(-1, stoppingToken);
+    
+    private static readonly TaskCompletionSource<DiscordClient> source = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    public static DiscordClient Client => Await(source.Task);
+    
+    private static T Await<T>(Task<T> task) => task.GetAwaiter().GetResult();
+
+    public static class Servers
     {
-        internal static Random Random = new();
-        internal static readonly ulong DevRoleID = 440605627526545429uL;
-        internal static readonly ulong DevServerID = 458428222061936650uL;
-
-        internal static class Buttons
+        public static class IDs
         {
-            internal static DiscordButtonComponent MarkUnimplemented(ulong mID) => new(DiscordButtonStyle.Secondary, $"mark_unimplemented_{mID}", "", false, new(Emojis.Submitted));
-            internal static DiscordButtonComponent MarkImplmented(ulong mID) => new(DiscordButtonStyle.Secondary, $"mark_implemented_{mID}", "", false, new (Emojis.Implemented));
+            public const ulong DevServerID = 458428222061936650uL;
+            public const ulong ArtServerID = 404725126425214999uL;
         }
 
-        internal static class Emojis
-        {
-            internal static readonly DiscordEmoji Submitted = DiscordEmoji.FromName(DiscordConnection.Client, IDs.Submitted);
-            internal static readonly DiscordEmoji Implemented = DiscordEmoji.FromName(DiscordConnection.Client, IDs.Implemented);
-            internal static readonly DiscordEmoji PositiveVotes = DiscordEmoji.FromName(DiscordConnection.Client, IDs.PositiveVotes);
-            internal static readonly DiscordEmoji ImprovementVotes = DiscordEmoji.FromName(DiscordConnection.Client, IDs.ImprovementVotes);
-            internal static readonly DiscordEmoji NegativeVotes = DiscordEmoji.FromName(DiscordConnection.Client, IDs.NegativeVotes);
-            internal static readonly DiscordEmoji Status = DiscordEmoji.FromName(DiscordConnection.Client, IDs.Status);
-            internal static readonly DiscordEmoji Votes = DiscordEmoji.FromName(DiscordConnection.Client, IDs.Votes);
-            internal static readonly DiscordEmoji Notes = DiscordEmoji.FromName(DiscordConnection.Client, IDs.Notes);
-            internal static readonly DiscordEmoji VoteYesButton = DiscordEmoji.FromGuildEmote(DiscordConnection.Client, IDs.VoteYesButton);
-            internal static readonly DiscordEmoji VoteNoButton = DiscordEmoji.FromGuildEmote(DiscordConnection.Client, IDs.VoteNoButton);
-            internal static readonly DiscordEmoji NeedsImprovementButton = DiscordEmoji.FromName(DiscordConnection.Client, IDs.NeedsImprovementButton);
-            internal static readonly DiscordEmoji NeutralButton = DiscordEmoji.FromGuildEmote(DiscordConnection.Client, IDs.NeutralButton);
-            internal static readonly DiscordEmoji DevFeedback = DiscordEmoji.FromName(DiscordConnection.Client, IDs.DevFeedback);
+        public static readonly DiscordGuild DevServer = Await(Client.GetGuildAsync(IDs.DevServerID));
+        public static readonly DiscordGuild ArtServer = Await(Client.GetGuildAsync(IDs.ArtServerID));
+    }
 
-            internal static class IDs
-            {
-                internal static readonly string Submitted = ":white_check_mark:";
-                internal static readonly string Implemented = ":checkered_flag:";
-                internal static readonly string PositiveVotes = ":white_check_mark:";
-                internal static readonly string ImprovementVotes = ":tools:";
-                internal static readonly string NegativeVotes = ":x:";
-                internal static readonly string Status = ":cyclone:";
-                internal static readonly string Votes = ":ballot_box:";
-                internal static readonly string Notes = ":book:";
-                internal static readonly ulong VoteYesButton = 1097490843243393044uL;
-                internal static readonly string NeedsImprovementButton = ":twisted_rightwards_arrows:";
-                internal static readonly ulong VoteNoButton = 1097490848742117458uL;
-                internal static readonly ulong NeutralButton = 1097490850285625424uL;
-                internal static readonly string DevFeedback = ":pencil:";
-            }
+    public static class Channels
+    {
+        public static class DevServer
+        {
+            public static readonly DiscordChannel AssetVoting = Await(Client.GetChannelAsync(612004648118779904uL));
+            public static readonly DiscordChannel CompletedAssets = Await(Client.GetChannelAsync(458446442340548639uL));
+            public static readonly DiscordChannel AssetDiscussion = Await(Client.GetChannelAsync(1303223163471265852uL));
+        }
+        
+        public static class ArtServer
+        {
+            public static readonly DiscordChannel AssetSubmissions = Await(Client.GetChannelAsync(459252132068065280uL));
         }
 
-        internal static class Channels
+        public static class DataBase
         {
-            internal static readonly DiscordChannel AssetSubmissions = DiscordConnection.Client.GetChannelAsync(IDs.AssetSubmissions).GetAwaiter().GetResult();
-            internal static readonly DiscordChannel AssetVoting = DiscordConnection.Client.GetChannelAsync(IDs.AssetVoting).GetAwaiter().GetResult();
-            internal static readonly DiscordChannel CompletedAssets = DiscordConnection.Client.GetChannelAsync(IDs.CompletedAssets).GetAwaiter().GetResult();
-            internal static readonly DiscordChannel ImageCache = DiscordConnection.Client.GetChannelAsync(IDs.ImageCache).GetAwaiter().GetResult();
-            internal static readonly DiscordChannel ArtDiscussion = DiscordConnection.Client.GetChannelAsync(IDs.ArtDiscussion).GetAwaiter().GetResult();
-
-            internal static class IDs
-            {
-                internal static readonly ulong AssetSubmissions = 459252132068065280uL;
-                internal static readonly ulong AssetVoting = 612004648118779904uL;
-                internal static readonly ulong CompletedAssets = 458446442340548639uL;
-                internal static readonly ulong ImageCache = 1068979750741233786uL;
-                internal static readonly ulong ArtDiscussion = 458428837017944094uL;
-            }
+            public static readonly DiscordChannel ImageCache = Await(Client.GetChannelAsync(1068979750741233786uL));
         }
+    }
 
-        internal static class Colors
+    public static class Emojis
+    {
+        public static class Legend
         {
-            internal static readonly DiscordColor Submitted = DiscordColor.Goldenrod;
-            internal static readonly DiscordColor Accepted = DiscordColor.DarkGreen;
-            internal static readonly DiscordColor Implemented = DiscordColor.Lilac;
-            internal static readonly DiscordColor CloseRejected = DiscordColor.MidnightBlue;
-            internal static readonly DiscordColor Rejected = DiscordColor.Red;
+            public static readonly DiscordEmoji PositiveVotes = DiscordEmoji.FromName(Client, ":white_check_mark:");
+            public static readonly DiscordEmoji ImprovementVotes = DiscordEmoji.FromName(Client, ":tools:");
+            public static readonly DiscordEmoji NegativeVotes = DiscordEmoji.FromName(Client, ":x:");
+            
+            public static readonly DiscordEmoji Status = DiscordEmoji.FromName(Client, ":cyclone:");
+            public static readonly DiscordEmoji Voting = DiscordEmoji.FromName(Client, ":ballot_box:");
+            public static readonly DiscordEmoji Notes = DiscordEmoji.FromName(Client, ":book:");
+            
+            public static readonly DiscordEmoji DevNotes = DiscordEmoji.FromName(Client, ":mag:");
+            public static readonly DiscordEmoji ArtistFeedback = DiscordEmoji.FromName(Client, ":pencil:");
         }
+        
+        public static class Votes
+        {
+            public static readonly DiscordEmoji Yes = DiscordEmoji.FromGuildEmote(Client, 1097490843243393044uL);
+            public static readonly DiscordEmoji NeedsImprovement = Legend.ImprovementVotes; // DiscordEmoji.FromName(Client, ":twisted_rightwards_arrows:");
+            public static readonly DiscordEmoji No = DiscordEmoji.FromGuildEmote(Client, 1097490848742117458uL);
+            public static readonly DiscordEmoji Neutral = DiscordEmoji.FromGuildEmote(Client, 1097490850285625424uL);
+        }
+        
+        public static class Button
+        {
+            public static readonly DiscordEmoji Submitted = DiscordEmoji.FromName(Client, ":white_check_mark:");
+            public static readonly DiscordEmoji Implemented = DiscordEmoji.FromName(Client, ":checkered_flag:");
+        }
+    }
+
+    public static class Roles
+    {
+        public static readonly DiscordRole Spriter = Await(Servers.DevServer.GetRoleAsync(458434431498321920uL));
+    }
+
+    public static class Colors
+    {
+        public static readonly DiscordColor Submitted = DiscordColor.Goldenrod;
+        public static readonly DiscordColor Accepted = DiscordColor.DarkGreen;
+        public static readonly DiscordColor Rejected = DiscordColor.Red;
+        public static readonly DiscordColor CloseRejected = DiscordColor.MidnightBlue;
+        public static readonly DiscordColor NeedsImprovementRejected = DiscordColor.Purple;
+        public static readonly DiscordColor Implemented = DiscordColor.Lilac;
+    }
+    
+    public static class Buttons
+    {
+        public static readonly DiscordButtonComponent MarkUnimplemented = new(DiscordButtonStyle.Secondary, "mark_unimplemented", "", false, new(Emojis.Button.Submitted));
+
+        public static readonly DiscordButtonComponent MarkImplemented = new(DiscordButtonStyle.Secondary, "mark_implemented", "", false, new(Emojis.Button.Implemented));
+
+        public static readonly DiscordButtonComponent AddDeveloperNotesPrompt = new(DiscordButtonStyle.Secondary, "devnotes", "Add Selection Notes", false);
+        
+        public static readonly DiscordButtonComponent AddFeedbackPrompt = new(DiscordButtonStyle.Secondary, "devfeedback", "Add Feedback", false);
+
+        public static DiscordSelectComponent AssetTypeSelection(AssetType currentAssetType) => new("assettype", "Asset Type",
+            Enum.GetValues<AssetType>().Select(c => new DiscordSelectComponentOption(Enum.GetName<AssetType>(c)!, Enum.GetName<AssetType>(c)!, isDefault: c == currentAssetType)), false, 1, 1);
+
+        public static DiscordLinkButtonComponent ArtServerQuickLink(DiscordMessage message) => new(message.JumpLink.AbsoluteUri, "Jump to Art Server");
+    }
+
+    public static class Modals
+    {
+        public static DiscordInteractionResponseBuilder AddDeveloperNotes(string? currentNotes, ulong devId) => new DiscordInteractionResponseBuilder()
+            .WithCustomId($"{devId}_notes")
+            .WithTitle("Developer Acceptance Notes")
+            .AddTextInputComponent(new("Notes", "notes", "Which variant was selected?", currentNotes, false, DiscordTextInputStyle.Short));
+        
+        public static DiscordInteractionResponseBuilder AddFeedback(string? currentFeedback, ulong devId) => new DiscordInteractionResponseBuilder()
+            .WithCustomId($"{devId}_feedback")
+            .WithTitle("Art Team Feedback")
+            .AddTextInputComponent(new("Feedback", "feedback", "Before resubmitting, you should...", currentFeedback, false, DiscordTextInputStyle.Paragraph));
     }
 }
