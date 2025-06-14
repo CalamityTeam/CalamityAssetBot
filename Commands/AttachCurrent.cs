@@ -122,13 +122,13 @@ namespace CalamityAssetBot.Commands
                 string currentUrl = await attachment.GetPermanentUrlAsync("addedcurrent");
                 devComponents[0] = new DiscordSectionComponent(
                     devComponents[0],
-                    new DiscordThumbnailComponent(currentUrl, $"{assetName} current asset", false));
+                    new DiscordThumbnailComponent(currentUrl));
                 
                 // Update public if found
                 if (publicComponents is not null)
                     publicComponents[0] = new DiscordSectionComponent(
                         publicComponents[0],
-                        new DiscordThumbnailComponent(currentUrl, $"{assetName} current asset", false));
+                        new DiscordThumbnailComponent(currentUrl));
             }
 
             // For videos, place it below the asset submission
@@ -136,12 +136,12 @@ namespace CalamityAssetBot.Commands
             {
                 var displayUrl = await attachment.GetPermanentUrlAsync("addedcurrent");
                 devComponents.Insert(4, new DiscordMediaGalleryComponent([
-                    new(displayUrl, $"{assetName} current asset")
+                    new(displayUrl)
                 ]));
                 
                 // Update public if found
                 publicComponents?.Insert(3, new DiscordMediaGalleryComponent([
-                    new(displayUrl, $"{assetName} current asset")
+                    new(displayUrl)
                 ]));
             }
 
@@ -159,12 +159,12 @@ namespace CalamityAssetBot.Commands
                 // Attach as a display
                 string displayUrl = await Extensions.GetPermanentUrlAsync(converted);
                 devComponents.Insert(4, new DiscordMediaGalleryComponent([
-                    new(displayUrl, $"{assetName} current asset")
+                    new(displayUrl)
                 ]));
                 
                 // Update public if found
                 publicComponents?.Insert(3, new DiscordMediaGalleryComponent([
-                    new(displayUrl, $"{assetName} current asset")
+                    new(displayUrl)
                 ]));
             }
 

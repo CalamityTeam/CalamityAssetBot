@@ -122,7 +122,7 @@ public class SubmitCommand
                 string currentUrl = await current.GetPermanentUrlAsync("current");
                 containerComponents.Add(new DiscordSectionComponent(
                     assetDescription,
-                    new DiscordThumbnailComponent(currentUrl, $"{assetName} current asset")));
+                    new DiscordThumbnailComponent(currentUrl)));
             }
 
             // Otherwise, mark it for addition later and just add the description normally
@@ -152,7 +152,7 @@ public class SubmitCommand
 
             string displayUrl = await display.GetPermanentUrlAsync("submission");
             containerComponents.Add(new DiscordMediaGalleryComponent([
-                new(displayUrl, $"{assetName} submission")
+                new(displayUrl)
             ]));
         }
 
@@ -173,7 +173,7 @@ public class SubmitCommand
             // Attach as a display
             string displayUrl = await Extensions.GetPermanentUrlAsync(converted);
             containerComponents.Add(new DiscordMediaGalleryComponent([
-                new(displayUrl, $"{assetName} submission")
+                new(displayUrl)
             ]));
         }
 
@@ -195,7 +195,7 @@ public class SubmitCommand
             {
                 string displayUrl = await current.GetPermanentUrlAsync("current");
                 containerComponents.Add(new DiscordMediaGalleryComponent([
-                    new(displayUrl, $"{assetName} current")
+                    new(displayUrl)
                 ]));
             }
             
@@ -213,7 +213,7 @@ public class SubmitCommand
                 // Attach as a display
                 string displayUrl = await Extensions.GetPermanentUrlAsync(converted);
                 containerComponents.Add(new DiscordMediaGalleryComponent([
-                    new(displayUrl, $"{assetName} current")
+                    new(displayUrl)
                 ]));
             }
 

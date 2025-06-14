@@ -43,7 +43,7 @@ public class VotingChecker(ILogger<VotingChecker> logger) : AsyncTimer(logger)
 
             // Only check messages on the new system
             if (!(message.Components?.Any() ?? false) || message.Components[0] is not DiscordContainerComponent container)
-                continue;
+                break;
 
             // Break from the loop if we've hit any message that have already finished voting
             if ((container.Color?.Value ?? 0) != Cache.Colors.Submitted.Value)
