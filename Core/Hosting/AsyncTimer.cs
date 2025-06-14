@@ -108,7 +108,7 @@ public static class AsyncTimerExtensions
         foreach (var type in types)
         {
             var addHostedGeneric = addHostedSingletonMethod.MakeGenericMethod(type);
-            addHostedGeneric.Invoke(services, null);
+            addHostedGeneric.Invoke(null, [services]);
         }
     }
 }
