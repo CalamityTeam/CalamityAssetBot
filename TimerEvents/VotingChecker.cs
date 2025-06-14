@@ -10,13 +10,14 @@ namespace CalamityAssetBot.TimerEvents;
 [UsedImplicitly]
 public class VotingChecker(ILogger<VotingChecker> logger) : AsyncTimer(logger)
 {
-    public override TimeSpan Interval  => TimeSpan.FromMinutes(5);
+    public override TimeSpan? InitialInterval => TimeSpan.FromSeconds(10);
+    public override TimeSpan Interval => TimeSpan.FromMinutes(5);
     
     public static readonly TimeSpan VotingPeriod = TimeSpan.FromDays(3);
     
     public override async Task RunAsync()
     {
-        DiscordMessage message = await Cache.Channels.DevServer.AssetVoting.GetMessagesAsync(1).FirstAsync();
+        DiscordMessage message = await Cache.Channels.DevServer.AssetVoting.GetMessageAsync(1382120239386591324, true);//.GetMessagesAsync(1).FirstAsync();
         ulong? previousId = null;
 
         while (true)

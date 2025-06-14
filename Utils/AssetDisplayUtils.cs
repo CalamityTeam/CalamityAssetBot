@@ -92,13 +92,14 @@ namespace CalamityAssetBot.Utils
             };
 
             // Update message with new color/status
-            var builder = new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(new(components, false, color));
+            var builder = new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(new(components, false, color)).CopyFiles(message, out var assetStreams);;
 
             // Include buttons if this asset has extra ones
             if (message.Components.Count > 1)
                 builder.AddActionRowComponent((message.Components[1] as DiscordActionRowComponent)!);
             
             await message.ModifyAsync(builder, attachments: message.Attachments);
+            await assetStreams.DisposeAllAsync();
 
             // Return if this is being called on the public message
             // We just called this recursively from the message in dev if that was the case
