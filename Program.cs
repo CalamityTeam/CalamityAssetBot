@@ -28,6 +28,7 @@ builder.Services.AddHostedSingleton<Cache>();
 
 builder.Services.AddDiscordClient(DiscordBotService.Token, DiscordBotService.Intents);
 builder.Services.RegisterEventHandlers();
+builder.Services.AddAsyncTimers();
 
 builder.Services.AddCommandsExtension(
     (_, commands) => {

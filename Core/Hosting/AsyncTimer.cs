@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using System.Reflection;
+using CalamityAssetBot.Utils;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Timer = System.Timers.Timer;
 
@@ -87,5 +90,25 @@ public abstract class AsyncTimer(ILogger logger) : IHostedService
         Timer.Elapsed += async (_, _) => await InvokeAsync().ConfigureAwait(false);
         Timer.AutoReset = true;
         Timer.Start();
+    }
+}
+
+public static class AsyncTimerExtensions
+{
+    private static readonly MethodInfo addHostedSingletonMethod = typeof(Extensions).GetMethod(
+        "AddHostedSingleton",
+        BindingFlags.Public | BindingFlags.Static,
+        [typeof(IServiceCollection)])!;
+    
+    public static void AddAsyncTimers(this IServiceCollection services)
+    {
+        var timerType = typeof(AsyncTimer);
+        var types = timerType.Assembly.GetTypes().Where(t => t.IsSubclassOf(timerType) && !t.IsAbstract);
+        
+        foreach (var type in types)
+        {
+            var addHostedGeneric = addHostedSingletonMethod.MakeGenericMethod(type);
+            addHostedGeneric.Invoke(services, null);
+        }
     }
 }
