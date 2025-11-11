@@ -51,9 +51,14 @@ namespace CalamityAssetBot.Utils
                     return 1;
 
                 var member = user as DiscordMember;
-                member ??= await Cache.Servers.DevServer.GetMemberAsync(user.Id, true);
 
-                return member.Roles.Contains(Cache.Roles.Spriter) ? 2 : 1;
+                if (member is null)
+                {
+                    try { member = await Cache.Servers.DevServer.GetMemberAsync(user.Id, true); }
+                    catch { }
+                }
+
+                return (member?.Roles.Contains(Cache.Roles.Spriter) ?? false) ? 2 : 1;
             }
 
             // Calculates the total voting score for a given emoji, factoring user vote weights
