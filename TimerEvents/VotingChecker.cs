@@ -57,6 +57,14 @@ public class VotingChecker(ILogger<VotingChecker> logger) : AsyncTimer(logger)
             (int positiveVotes, int improvementVotes, int negativeVotes) = await Extensions.GetVotes(message, assetType);
             int totalVotes = positiveVotes + improvementVotes + negativeVotes;
 
+            // Sometimes the Discord API breaks.
+            // If it does, just come back later.
+            if (totalVotes == 0)
+            {
+                DiscordBotService.CommandAccess.Release();
+                continue;
+            }
+
             // If 2/3's+ the votes were positive, pass the asset
             if (positiveVotes >= totalVotes * (2f / 3f))
             {
